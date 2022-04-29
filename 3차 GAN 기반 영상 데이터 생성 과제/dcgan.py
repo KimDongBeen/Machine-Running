@@ -53,10 +53,7 @@ class DCGAN():
         model.add(Dense(128 * 7 * 7, activation="relu", input_dim=self.latent_dim))
         model.add(Reshape((7, 7, 128)))
 
-        #### (1) 여기에 계층을 쌓아주세요
-        #### Input : (100)
-        #### Output : (28, 28, 1)
-
+      
         model.add(Conv2D(100, kernel_size=3, padding="same"))
         model.add(BatchNormalization(momentum=0.8))
         model.add(Activation("relu"))
@@ -76,15 +73,13 @@ class DCGAN():
         img = model(noise)
         return Model(noise, img)
 
-    # 판별자 정의 함수
+ 
     def build_discriminator(self):
 
         model = Sequential()
         model.add(Conv2D(32, kernel_size=3, strides=2, input_shape=self.img_shape, padding="same"))
 
-        #### (2) 여기에 계층을 쌓아주세요
-        #### Input : (28, 28, 1)
-        #### Output : (1)
+    
 
         model.add(LeakyReLU(alpha=0.2))
         model.add(Dropout(0.25))
@@ -109,10 +104,10 @@ class DCGAN():
         validity = model(img)
         return Model(img, validity)
 
-    # 학습 함수
+  
     def train(self, epochs, batch_size=128, sample_interval=50):
 
-        # 데이터셋 로드
+      
         (X_train, _), (_, _) = fashion_mnist.load_data()
 
         X_train = X_train / 127.5 - 1.
@@ -124,34 +119,25 @@ class DCGAN():
         G_loss_list = []
         for epoch in range(1,epochs+1):
 
-            # ---------------------
-            #  판별자 학습
-            # ---------------------
-
-            # 학습에 사용할 이미지 랜덤으로 선택
+          
             idx = np.random.randint(0, X_train.shape[0], batch_size)
             imgs = X_train[idx]
 
-            # 노이즈 생성
+          
             noise = np.random.normal(0, 1, (batch_size, self.latent_dim))
 
-            # 생성자가 이미지 생성
+         
             gen_imgs = self.generator.predict(noise)
 
-            # 판별자 학습
+       
             X_fake_and_real = tf.concat([gen_imgs, imgs], axis=0)
             fake_and_valid_label = tf.constant([[0.]] * batch_size + [[1.]] * batch_size)
             self.discriminator.tainable = True
             d_loss = self.discriminator.train_on_batch(X_fake_and_real, fake_and_valid_label)
 
-            # ---------------------
-            #  생성자 학습
-            # ---------------------
-
-            # 노이즈 생성
             noise = np.random.normal(0, 1, (batch_size, self.latent_dim))
 
-            # 판별자 레이블 샘플을 유효한 것으로 지정
+        
             valid_label = tf.constant([[1.]] * batch_size)
             self.discriminator.tainable = False
             g_loss = self.model.train_on_batch(noise, valid_label)
@@ -163,7 +149,7 @@ class DCGAN():
                 self.sample_images(epoch)
         self.plotLoss(G_loss_list, D_loss_list, epoch)
 
-    # 그래프를 생성하는 함수
+  
     def plotLoss(self, G_loss, D_loss, epoch):
         plt.figure(figsize=(10, 8))
         plt.plot(D_loss, label='Discriminitive loss')
@@ -173,7 +159,7 @@ class DCGAN():
         plt.legend()
         plt.savefig('loss_graph/gan_loss_epoch_%d.png' % epoch)
 
-    # 이미지를 저장하는 함수
+  
     def sample_images(self, epoch):
         r, c = 5, 5
         noise = np.random.normal(0, 1, (r * c, self.latent_dim))
@@ -192,12 +178,12 @@ class DCGAN():
         fig.savefig("images/%d.png" % epoch)
         plt.close()
 
-    # 모델을 로드하는 함수
+   
     def load_model(self, model_path='saved_model/model.h5'):
         print('\nload model : \"{}\"'.format(model_path))
         self.model = tf.keras.models.load_model(model_path)
 
-    # 모델을 저장하는 함수
+   
     def save_model(self, model_path='saved_model/model.h5'):
         print('\nsave model : \"{}\"'.format(model_path))
         self.model.save(model_path)

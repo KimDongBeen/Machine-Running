@@ -15,7 +15,7 @@ MONITOR = False
 
 class DQN():
     def __init__(self, env_string, batch_size=64, IM_SIZE=84, m=4, target_update=15,
-                 logfile_name='./runs/NAME'):  ####저장할 log file 이름
+                 logfile_name='./runs/NAME'): 
         self.memory = deque(maxlen=5000)
         self.env = gym.make(env_string)
         input_size = self.env.observation_space.shape[0]
@@ -126,37 +126,25 @@ class DQN():
 
         print('Did not solve after {} episodes 😞'.format(e))
 
-        """
-        학습한 모델을 저장하는 함수 호출 필요
-        ex)self.save_model(....)
-        """
+   
         self.save_model()
 
         return avg_scores
 
     def save_model(self, model_path='saved_model/model.pb'):
-        """
-        학습한 모델 저장하는 함수
-        """
+      
         print('\nsave model : \"{}\"'.format(model_path))
         self.model.save(model_path)
         pass
 
     def load_model(self, model_path='saved_model/model.pb'):
-        """
-        저장된 모델을 불러오는 함수
-        """
+     
         print('\nload model : \"{}\"'.format(model_path))
         self.model = tf.keras.models.load_model(model_path)
         pass
 
     def test(self):
-        """
-        불러온 모델로 게임 플레이를 하는 함수
-        (score는 reward와 동일합니다.)
-        :return: avg_scores
-        """
-
+     
         scores1 = deque(maxlen=100)
         avg_scores = []
         print('\ntest model')
